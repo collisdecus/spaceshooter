@@ -1,0 +1,15 @@
+[package]
+
+name = "spaceshooter"
+version = "0.0.1"
+authors = [
+    "Michael Schießl <michael@collisdecus.de>"
+]
+
+[[bin]]
+name = "spaceshooter"
+
+[dependencies]
+piston_window = "0.5.0"
+rand = "*"
+find_folder = "*"
