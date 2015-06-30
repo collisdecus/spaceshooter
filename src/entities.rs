@@ -6,6 +6,7 @@ pub trait Entity {
     fn position(&self) -> &Vector2<f64>;
 }
 
+#[derive(Clone)]
 pub struct Renderable {
     pub color: [f32; 4],
     pub polygon: Vec<[f64; 2]>
@@ -36,7 +37,7 @@ impl Renderable {
     }
 }
 
-
+#[derive(Clone)]
 pub struct Asteroid {
     position: Vector2<f64>,
     renderable: Renderable
@@ -55,7 +56,6 @@ impl Asteroid {
     pub fn simulate(&mut self, dt: f64) {
         self.position.y += dt * 100.0;
     }
-
 }
 
 impl Entity for Asteroid {
@@ -68,6 +68,7 @@ impl Entity for Asteroid {
     }
 }
 
+#[derive(Clone)]
 pub struct Projectile {
     position: Vector2<f64>,
     renderable: Renderable

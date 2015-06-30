@@ -45,19 +45,3 @@ pub fn intersect<T: Entity, V: Entity>(first: &T, second: &V) -> bool {
     first_bound.top + first_pos.y < second_bound.bottom + second_pos.y && 
     first_bound.bottom + first_pos.y > second_bound.top + second_pos.y
 }
-
-pub fn clean_collection<T: Entity, V: Fn(&T) -> bool>(collection: &mut Vec<T>, condition: V) {
-    let mut obsolete : Vec<usize> = Vec::new();
-    for (i, element) in collection.iter().enumerate() {
-        if condition(element) {
-            obsolete.push(i);
-        }
-    }
-
-    obsolete.sort();
-    obsolete.reverse();
-
-    for i in obsolete {
-        collection.remove(i);
-    }
-}

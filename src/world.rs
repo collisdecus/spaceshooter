@@ -48,7 +48,16 @@ impl World {
         }
 
         self.spawn_asteroids(dt);
-        self.handle_collisions();
+
+        match self.handle_collisions() {
+            Some((projectile, asteroid)) => {
+                self.projectiles.remove(projectile);
+                self.asteroids.remove(asteroid);
+                self.score += 1;
+            },
+            None => {}
+        }
+
         self.cleanup();
     }
 
@@ -83,6 +92,7 @@ impl World {
     pub fn reset(&mut self) {
         self.score = 0;
         self.ship = Ship::new();
+        self.ship.set_moveable_width(self.viewport.x as u32);
         self.projectiles.clear();
         self.asteroids.clear();
     }
@@ -115,52 +125,34 @@ impl World {
     }
 
 
-    fn handle_collisions(&mut self) {
-        let mut destroyed_asteroid = None;
-        let mut destroyed_projectile = None;
+    fn handle_collisions(&mut self) -> Option<(usize,usize)> {
+        if self.asteroids.iter().any(|asteroid| {
+            intersect(asteroid, &self.ship)
+        }) {
+            self.ship.destroy();
+            self.projectiles.clear();
+        }
 
-        for (j, projectile) in self.projectiles.iter().enumerate() {
-            for (i, asteroid) in self.asteroids.iter().enumerate() {
+        for (i, projectile) in self.projectiles.iter().enumerate() {
+            for (k, asteroid) in self.asteroids.iter().enumerate() {
                 if intersect(projectile, asteroid) {
-                    self.score += 1;
-                    destroyed_asteroid = Some(i);
-                    destroyed_projectile = Some(j);
-                    break;
+                    return Some((i, k));
                 }
             }
-
-            if destroyed_projectile.is_some() {
-                break;
-            }
         }
 
-        if destroyed_projectile.is_some() {
-            self.projectiles.remove(destroyed_projectile.unwrap());
-        }
-
-        if destroyed_asteroid.is_some() {
-            self.asteroids.remove(destroyed_asteroid.unwrap());
-        }
-
-
-        for asteroid in self.asteroids.iter() {
-            if intersect(asteroid, &self.ship) {
-                self.ship.destroy();
-                self.projectiles.clear();
-            }
-        }
+        None
     }
 
 
     fn cleanup(&mut self) {
-        let viewport_height = self.viewport.y;
-        clean_collection(&mut self.projectiles, |projectile| {
-            projectile.position().y < -(viewport_height as f64) 
-        });
+        self.projectiles = self.projectiles.iter().cloned().filter(|projectile| {
+            projectile.position().y > -(self.viewport.y as f64)
+        }).collect();
 
-        clean_collection(&mut self.asteroids, |asteroid| {
-            asteroid.position().y > 50.0
-        });
+        self.asteroids = self.asteroids.iter().cloned().filter(|asteroid| {
+            asteroid.position().y < 50.0
+        }).collect();
     }
 }
 
